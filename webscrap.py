@@ -1,4 +1,4 @@
-import os
+import os,inspect
 from lxml import html
 import requests
 from lxml.html import fromstring, tostring
@@ -10,7 +10,7 @@ import pprint
 base_url = 'https://colnect.com/en/stamps/list/country/8662-Nepal/'
 res = requests.get(base_url)
 tree = html.fromstring(res.content)
-
+dir_path = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 
 #Variants:
 def variants(variant_link):
@@ -58,15 +58,13 @@ for page in range(1, int(page_number) + 1):
                 t_text = t_text.split(':')[0]
                 v_text = value.text_content()
 
-                if 'Sn' in v_text:
-                    split1 = v_text.split(',')[1]
-                    split11 = split1.split(':')[0]
-                    split11 = split11.split(' ')[1]
-                    split12 = split1.split(':')[1]
-                    split21 = split12.split(' ')[1]
-                    #print(split21)
-                    result[split11].append(split21)
-                    #print(dict(result))
+                if v_text.startswith('M'):
+                    catalogcode = v_text
+                    if 'Sn' in catalogcode:
+                        sn = catalogcode.split(',')[1]
+                        sn_value = sn.split(':')[1]
+                        rem_np = sn_value.split(' ')[1]
+                        result['Sn'].append(rem_np)
 
                 elif '\t' in v_text:
                     slice1 = v_text.split('\t')[0]
@@ -114,26 +112,28 @@ for page in range(1, int(page_number) + 1):
         # For Scraping the images:
         image = val.xpath('//*[@id="plist_items"]/div' + str([i + 1]) + '/div[1]/a/img')
         for link in image:
-            # print(link)
-            image1 = link.xpath('./@src') or link.xpath('./@data-src')
-            for i in image1:
-                image = "http:" + i
-                # print(image)
-                r2 = requests.get(image)
-                img = os.path.split(image)[0]
-                image_name = img1 = os.path.split(img)[1] + os.path.split(image)[1]
-                # print(image_name)
-                with open("NepalStamps/" + image_name, "wb") as f:
-                    f.write(r2.content)
+            #image1 = link.xpath('./@src') or link.xpath('./@data-src')
+            image1 = link.xpath("./@data-src")[0].split("/")[-5]
+            image2 = link.xpath("./@data-src")[0].split("/")[4:]
+            image2 = '/'.join(image2)
+            img = str(image1) + '/b/' + str(image2)
+            image = "http://" + img
+            #print(image)
 
-            result['Image'].append("/home/Documents/webscraping/webScraping/NepalStamps/" + image_name)
-            details = dict(result)
+            r2 = requests.get(image)
+            img = os.path.split(image)[0]
+            image_name = img1 = os.path.split(img)[1] + os.path.split(image)[1]
+            # print(image_name)
+            with open("NepalStamps/" + image_name, "wb") as f:
+                f.write(r2.content)
 
-            dic1 = {k: v for k, v in details.items() if k != 'Buy Now'}
-            data = {k: (''.join(v)) for k, v in dic1.items()}
-            list_data.append(data)
+        result['Image'].append(dir_path + "/NepalStamps/" + image_name)
+        details = dict(result)
+
+        dic1 = {k: v for k, v in details.items() if k != 'Buy Now'}
+        data = {k: (''.join(v)) for k, v in dic1.items()}
+        list_data.append(data)
     pprint.pprint(list_data)
     print('\n')
     with open('stampData.json', 'a') as f:
         json.dump(list_data, f, sort_keys=True, indent=2)
-
