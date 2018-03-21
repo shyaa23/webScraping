@@ -129,9 +129,9 @@ for page in range(1, int(page_number) + 1):
             r2 = requests.get(image)
             img = os.path.split(image)[0]
             image_name = img1 = os.path.split(img)[1] + os.path.split(image)[1]
-            # print(image_name)
-            #with open("NepalStamps/" + image_name, "wb") as f:
-                #f.write(r2.content)
+            # -print(image_name)
+            with open("NepalStamps/" + image_name, "wb") as f:
+                f.write(r2.content)
 
         result['Image'].append(dir_path + "/NepalStamps/" + image_name)
         details = dict(result)
