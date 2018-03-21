@@ -65,6 +65,12 @@ for page in range(1, int(page_number) + 1):
                         sn_value = sn.split(':')[1]
                         rem_np = sn_value.split(' ')[1]
                         result['Sn'].append(rem_np)
+                    elif 'Yt' in catalogcode:
+                        if 'Sn' not in catalogcode:
+                            yt = catalogcode.split(',')[1]
+                            yt_value = yt.split(':')[1]
+                            rem_np1 = yt_value.split(' ')[1]
+                            result['Sn'].append(rem_np1)
 
                 elif '\t' in v_text:
                     slice1 = v_text.split('\t')[0]
@@ -124,8 +130,8 @@ for page in range(1, int(page_number) + 1):
             img = os.path.split(image)[0]
             image_name = img1 = os.path.split(img)[1] + os.path.split(image)[1]
             # print(image_name)
-            with open("NepalStamps/" + image_name, "wb") as f:
-                f.write(r2.content)
+            #with open("NepalStamps/" + image_name, "wb") as f:
+                #f.write(r2.content)
 
         result['Image'].append(dir_path + "/NepalStamps/" + image_name)
         details = dict(result)
